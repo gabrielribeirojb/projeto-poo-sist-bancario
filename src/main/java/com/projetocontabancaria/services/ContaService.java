@@ -48,7 +48,7 @@ public class ContaService {
 	public Conta depositaNaConta(Long idConta, Conta novoValor) {
 		
 		try {
-			Conta entidade = retornaContaPorId(idConta);
+			Conta entidade = retornaConta(idConta);
 			updateDeposito(entidade, novoValor);
 			Transacao novaTransacao = new Transacao(null, novoValor.getSaldo(), LocalDate.now(), entidade);
 			entidade.getTransacoes().add(novaTransacao);
