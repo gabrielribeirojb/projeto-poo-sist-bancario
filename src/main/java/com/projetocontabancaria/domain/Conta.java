@@ -7,6 +7,7 @@ import java.util.Objects;
 
 import com.projetocontabancaria.domain.enums.TipoConta;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -30,7 +31,7 @@ public class Conta {
 	@JoinColumn(name = "idPessoa", referencedColumnName = "idPessoa")
 	private Pessoa pessoa;
 	
-	@OneToMany(mappedBy = "conta")
+	@OneToMany(mappedBy = "conta",cascade=CascadeType.ALL)
 	private List<Transacao> transacoes = new ArrayList<>();
 	
 	private Double saldo;

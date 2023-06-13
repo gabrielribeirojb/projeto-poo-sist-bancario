@@ -1,6 +1,7 @@
 package com.projetocontabancaria.services;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -9,12 +10,19 @@ import com.projetocontabancaria.domain.Conta;
 import com.projetocontabancaria.domain.dto.ContaSaldoDTO;
 import com.projetocontabancaria.domain.enums.TipoConta;
 import com.projetocontabancaria.repositories.ContaRepository;
+import com.projetocontabancaria.repositories.TransacaoRepository;
+import com.projetocontabancaria.services.exceptions.ResourceNotFoundException;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class ContaService {
 	
 	@Autowired
 	private ContaRepository contaRepository;
+	
+	@Autowired
+	private TransacaoRepository transacaoRepository;
 	
 	public Conta criarConta(Conta obj) {
 		obj.setIdConta(null);
@@ -27,31 +35,48 @@ public class ContaService {
 		return obj;
 	}
 	
+	public Conta retornaContaPorId(Long idConta) {
+		Optional<Conta> obj = contaRepository.findById(idConta);
+		return obj.orElseThrow(() -> new ResourceNotFoundException(idConta));
+	}
+	
 	public Conta retornaConta(Long idConta){
 		return contaRepository.getReferenceById(idConta);
 	}
 	
 	public Conta depositaNaConta(Long idConta, Conta novoValor) {
-		Conta entidade = retornaConta(idConta);
-		updateDeposito(entidade, novoValor);
-		return contaRepository.save(entidade);
+		
+		try {
+			Conta entidade = retornaConta(idConta);
+			updateDeposito(entidade, novoValor);
+			
+			return contaRepository.save(entidade);
+		} catch (EntityNotFoundException e) {
+			throw new ResourceNotFoundException(idConta);
+		}
+		
 	}
 	
 	public ContaSaldoDTO retornaSaldo(Long idConta) {
-		Conta conta = contaRepository.getReferenceById(idConta);
+		Conta conta = retornaContaPorId(idConta);
 		ContaSaldoDTO contaSaldoDTO = new ContaSaldoDTO(conta);
 		return contaSaldoDTO;
 	}
 	
 	public Conta saqueNaConta(Long idConta, Conta novoValor) {
-		Conta entidade = retornaConta(idConta);
+		try {
+			Conta entidade = retornaConta(idConta);
+
+			updateSaque(entidade, novoValor);
+			return contaRepository.save(entidade);
+		} catch (EntityNotFoundException e) {
+			throw new ResourceNotFoundException(idConta);
+		}
 		
-		updateSaque(entidade, novoValor);
-		return contaRepository.save(entidade);
 	}
 	
 	public Conta bloqueiaConta(Long idConta) {
-		Conta entidade = retornaConta(idConta);
+		Conta entidade = retornaContaPorId(idConta);
 		
 		updateFlagAtivo(entidade);
 		return contaRepository.save(entidade);
