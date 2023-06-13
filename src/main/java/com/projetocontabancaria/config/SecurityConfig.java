@@ -15,6 +15,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+	
+	private static final String[] PUBLIC_MATCHERS = { "/**" };
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -22,6 +24,7 @@ public class SecurityConfig {
 		http.headers((headers) -> headers.frameOptions((frameOptions) -> frameOptions.disable()));
 		http.csrf((csrf) -> csrf.disable());
 		http.cors((cors) -> cors.disable());
+		http.authorizeRequests().requestMatchers(PUBLIC_MATCHERS).permitAll();
 		http.sessionManagement((sessionManagement) -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 		return http.build();
 	}
