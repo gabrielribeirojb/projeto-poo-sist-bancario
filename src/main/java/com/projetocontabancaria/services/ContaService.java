@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.projetocontabancaria.domain.Conta;
+import com.projetocontabancaria.domain.Transacao;
 import com.projetocontabancaria.domain.dto.ContaSaldoDTO;
 import com.projetocontabancaria.domain.enums.TipoConta;
 import com.projetocontabancaria.repositories.ContaRepository;
@@ -47,9 +48,11 @@ public class ContaService {
 	public Conta depositaNaConta(Long idConta, Conta novoValor) {
 		
 		try {
-			Conta entidade = retornaConta(idConta);
+			Conta entidade = retornaContaPorId(idConta);
 			updateDeposito(entidade, novoValor);
-			
+			Transacao novaTransacao = new Transacao(null, novoValor.getSaldo(), LocalDate.now(), entidade);
+			entidade.getTransacoes().add(novaTransacao);
+
 			return contaRepository.save(entidade);
 		} catch (EntityNotFoundException e) {
 			throw new ResourceNotFoundException(idConta);
@@ -89,12 +92,8 @@ public class ContaService {
 	
 	private void updateSaque(Conta entidade, Conta novoValor) {
 		Double saldoAtual = entidade.getSaldo();
-		TipoConta tipoConta = entidade.getTipoConta();
-		if(entidade.getSaldo() + novoValor.getSaldo() < 0.0 && (tipoConta == TipoConta.CONTA_SALARIO || tipoConta == TipoConta.CONTA_POUPANCA)) {
-			throw new IllegalArgumentException("Não se pode sacar mais do que o saldo atual para esse tipo de conta");
-		} else {
-			entidade.setSaldo(saldoAtual -= novoValor.getSaldo());
-		}
+		Double valorSacado = -novoValor.getSaldo();
+		entidade.setSaldo(saldoAtual += valorSacado);
 	}
 	
 	private void updateFlagAtivo(Conta entidade) {

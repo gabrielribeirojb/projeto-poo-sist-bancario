@@ -3,6 +3,8 @@ package com.projetocontabancaria.domain;
 import java.time.LocalDate;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,6 +25,7 @@ public class Transacao {
 	
 	@ManyToOne
 	@JoinColumn(name = "idConta")
+	@JsonIgnore
 	private Conta conta;
 	
 	public Transacao() {
@@ -30,10 +33,11 @@ public class Transacao {
 	}
 	
 	
-	public Transacao(Long idTransacao, Double valor, LocalDate dataTransacao) {
+	public Transacao(Long idTransacao, Double valor, LocalDate dataTransacao,Conta conta) {
 		this.idTransacao = idTransacao;
 		this.valor = valor;
 		this.dataTransacao = dataTransacao;
+		this.conta = conta;
 	}
 
 	public Long getIdTransacao() {
@@ -60,7 +64,13 @@ public class Transacao {
 		this.dataTransacao = dataTransacao;
 	}
 
-
+	public String toString() {
+		return "ID: " + idTransacao+
+		", VALOR: " + valor
+		+", DataTransacao: " + dataTransacao
+		+", IDCONTA: "+ conta;
+	}
+	
 	@Override
 	public int hashCode() {
 		return Objects.hash(idTransacao);

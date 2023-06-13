@@ -116,6 +116,10 @@ public class Conta {
 		}
 	}
 
+	public String toString() {
+		return "CONTA: " + idConta;
+	}
+	
 	@Override
 	public int hashCode() {
 		return Objects.hash(idConta);
